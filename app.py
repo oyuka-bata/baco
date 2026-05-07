@@ -11,7 +11,12 @@ st.set_page_config(page_title="BACO Station", page_icon="🎵", layout="centered
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,400;0,500;1,400&display=swap');
-
+@media (max-width: 600px) {
+    .hero-title { font-size: 2.5rem; }
+    .persona-card { padding: 20px; }
+    .top-pick-card { flex-direction: column; align-items: center; text-align: center; }
+    .album-cover { width: 200px; height: 200px; }
+}
 .stApp {
     background-color: #0a0c0f;
     color: #f0f2f5;
