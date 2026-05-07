@@ -3,54 +3,157 @@ import pandas as pd
 import sqlite3
 import requests
 
-# --- 1. PAGE CONFIG & STYLING ---
+# --- 1. PAGE CONFIG ---
 st.set_page_config(page_title="BACO Station", page_icon="🎵", layout="centered")
 
-# --- 2. DATA LOADING & CACHING ---
-# Using st.cache_data prevents Streamlit from downloading the dataset on every interaction
+# --- 2. CUSTOM SPOTIFY-LIKE CSS INJECTION ---
+# This mirrors the styling from your uploaded HTML file
+st.markdown("""
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,400;0,500;1,400&display=swap');
+
+    /* Global Streamlit App Style overrides */
+    .stApp {
+        background-color: #0a0c0f;
+        color: #f0f2f5;
+        font-family: 'DM Sans', sans-serif;
+    }
+    
+    header { visibility: hidden; } /* Hide the default Streamlit header */
+
+    /* Typography */
+    h1, h2, h3, .stMarkdown p strong {
+        font-family: 'Syne', sans-serif;
+        color: #ffffff;
+    }
+
+    /* Style Text Inputs and Selectboxes */
+    div[data-baseweb="select"] > div, 
+    div[data-baseweb="input"] > div {
+        background-color: #111318 !important;
+        border: 1px solid rgba(255,255,255,0.07) !important;
+        border-radius: 8px;
+        color: #f0f2f5 !important;
+    }
+    
+    /* Input focus borders */
+    div[data-baseweb="select"] > div:focus-within, 
+    div[data-baseweb="input"] > div:focus-within {
+        border-color: #1db954 !important;
+    }
+
+    /* Style the main Form Submit Button */
+    div.stButton > button {
+        background-color: #1db954;
+        color: #000000;
+        border: none;
+        border-radius: 999px;
+        font-family: 'Syne', sans-serif;
+        font-weight: 700;
+        font-size: 1rem;
+        padding: 0.5rem 2rem;
+        transition: transform 0.15s, background 0.15s;
+        width: 100%;
+        margin-top: 20px;
+    }
+    
+    div.stButton > button:hover {
+        background-color: #1ed760;
+        color: #000000;
+    }
+
+    /* Custom CSS Classes for HTML Results (mirrored from your HTML) */
+    .hero-title { font-family: 'Syne', sans-serif; font-size: 4rem; font-weight: 800; line-height: 0.95; margin-bottom: 10px; text-align: center; }
+    .hero-title span { color: #1db954; }
+    .hero-sub { color: #9aa3b2; text-align: center; font-size: 1.1rem; margin-bottom: 40px; font-weight: 300;}
+
+    .persona-card {
+        background: #111318;
+        border: 1px solid rgba(255,255,255,0.07);
+        border-radius: 14px;
+        padding: 36px;
+        margin-bottom: 20px;
+        text-align: center;
+        background: linear-gradient(135deg, rgba(29,185,84,0.08) 0%, rgba(29,185,84,0.02) 50%, rgba(80,50,120,0.06) 100%);
+    }
+    .persona-badge { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #1db954; margin-bottom: 10px; }
+    .persona-name { font-family: 'Syne', sans-serif; font-size: 2rem; font-weight: 800; margin-bottom: 10px; letter-spacing: -0.02em; }
+    .persona-desc { color: #9aa3b2; font-size: 0.95rem; margin: 0 auto 20px; font-style: italic; }
+    
+    .tag-row { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+    .tag { padding: 5px 14px; border-radius: 999px; font-size: 0.78rem; font-weight: 600; }
+    .tag-green { background: rgba(29,185,84,0.12); border: 1px solid rgba(29,185,84,0.35); color: #6ee7a7; }
+    .tag-gray { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.13); color: #9aa3b2; }
+
+    .top-pick-card {
+        background: #111318;
+        border: 1px solid rgba(255,255,255,0.07);
+        border-radius: 14px;
+        padding: 28px;
+        margin-bottom: 20px;
+        display: flex;
+        gap: 24px;
+        align-items: flex-start;
+    }
+    .album-cover { width: 140px; height: 140px; border-radius: 10px; object-fit: cover; flex-shrink: 0; background: #1f2430; }
+    .top-pick-info { flex: 1; }
+    .top-pick-eyebrow { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #1db954; margin-bottom: 8px; }
+    .top-pick-name { font-family: 'Syne', sans-serif; font-size: 1.5rem; font-weight: 700; margin-bottom: 4px; line-height: 1.2; }
+    .top-pick-artist { color: #9aa3b2; margin-bottom: 16px; font-size: 0.95rem; }
+    .audio-player audio { width: 100%; filter: invert(1) hue-rotate(180deg); margin-top: 15px; } /* Makes standard audio player match dark mode */
+
+    .explanation-box {
+        background: #111318;
+        border: 1px solid rgba(255,255,255,0.07);
+        border-left: 3px solid #1db954;
+        border-radius: 8px;
+        padding: 18px 20px;
+        margin-bottom: 20px;
+        font-size: 0.9rem;
+        color: #9aa3b2;
+        line-height: 1.7;
+    }
+
+    .playlist-header { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; margin-bottom: 12px; margin-top: 30px; display: flex; align-items: center; gap: 10px; }
+    .playlist-count { font-size: 0.75rem; background: #1f2430; border: 1px solid rgba(255,255,255,0.13); color: #9aa3b2; padding: 3px 10px; border-radius: 999px; font-family: 'DM Sans', sans-serif; font-weight: 500; }
+    
+    .playlist-track { display: flex; align-items: center; gap: 14px; padding: 14px 18px; border-radius: 8px; border: 1px solid transparent; transition: background 0.15s; }
+    .playlist-track:hover { background: #111318; border-color: rgba(255,255,255,0.07); }
+    .track-num { width: 22px; font-size: 0.8rem; color: #5c6578; text-align: center; flex-shrink: 0; }
+    .track-info { flex: 1; min-width: 0; }
+    .track-name { font-weight: 500; font-size: 0.93rem; color: #f0f2f5; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .track-artist { font-size: 0.8rem; color: #5c6578; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .track-tag { font-size: 0.72rem; padding: 3px 9px; border-radius: 999px; background: #1f2430; color: #5c6578; border: 1px solid rgba(255,255,255,0.07); margin-left: 5px;}
+</style>
+""", unsafe_allow_html=True)
+
+# --- 3. DATA LOADING & CACHING ---
 @st.cache_data
 def load_data():
     DB_NAME = "spotify_music.db"
     CSV_URL = "https://huggingface.co/datasets/sfiore/spotify-tracks-dataset/resolve/main/dataset.csv"
     
-    # Download dataset
     songs = pd.read_csv(CSV_URL)
-
-    # Clean column names
     songs.columns = [c.lower().strip() for c in songs.columns]
 
-    # Keep only useful columns
     wanted_columns = [
         "track_name", "artists", "track_genre", "danceability", 
         "energy", "valence", "tempo", "acousticness", 
         "instrumentalness", "speechiness", "liveness", "popularity"
     ]
-
     existing_columns = [c for c in wanted_columns if c in songs.columns]
     songs = songs[existing_columns].dropna()
 
-    # Save to SQLite database
     conn = sqlite3.connect(DB_NAME)
     songs.to_sql("spotify_tracks", conn, if_exists="replace", index=False)
-
-    # Load back from SQL (backend retrieval simulation)
-    songs = pd.read_sql_query(
-        "SELECT * FROM spotify_tracks LIMIT 50000", conn
-    )
+    songs = pd.read_sql_query("SELECT * FROM spotify_tracks LIMIT 50000", conn)
     conn.close()
 
-    # Rename columns for consistency
-    songs = songs.rename(columns={
-        "track_name": "name",
-        "artists": "artist",
-        "track_genre": "genre"
-    })
+    songs = songs.rename(columns={"track_name": "name", "artists": "artist", "track_genre": "genre"})
 
-    # Function to assign mood to each song based on energy and valence
     def assign_mood_to_song(row):
         e = row["energy"]
         v = row["valence"]
-
         if e >= 0.78 and v >= 0.78: return "Energetic"
         if e >= 0.65 and v >= 0.55: return "Happy"
         if e >= 0.65 and v < 0.55: return "Energetic"
@@ -61,11 +164,10 @@ def load_data():
         if e < 0.45 and v >= 0.55: return "Happy"
         return "Chill"
 
-    # Apply the mood assignment
     songs["mood"] = songs.apply(assign_mood_to_song, axis=1)
     return songs
 
-# --- 3. QUIZ DATA ---
+# --- 4. QUIZ DATA (Exactly 9 Questions) ---
 quiz = [
     {
         "title": "Which Hogwarts house feels most like you?",
@@ -150,13 +252,10 @@ quiz = [
     },
 ]
 
-# --- 4. LOGIC FUNCTIONS ---
+# --- 5. LOGIC FUNCTIONS ---
 def aggregate_profile(answers):
-    energy_sum = 0.0
-    valence_sum = 0.0
-    weight_sum = 0
-    genres = {}
-    moods = {}
+    energy_sum, valence_sum, weight_sum = 0.0, 0.0, 0
+    genres, moods = {}, {}
 
     for qi, ai in answers.items():
         opt = quiz[qi]["options"][ai]
@@ -164,10 +263,8 @@ def aggregate_profile(answers):
         energy_sum  += w["energy"]
         valence_sum += w["valence"]
         weight_sum  += 1
-        for g, v in w["genres"].items():
-            genres[g] = genres.get(g, 0) + v
-        for m, v in w["moods"].items():
-            moods[m] = moods.get(m, 0) + v
+        for g, v in w["genres"].items(): genres[g] = genres.get(g, 0) + v
+        for m, v in w["moods"].items(): moods[m] = moods.get(m, 0) + v
 
     return {
         "target_energy":  energy_sum  / weight_sum if weight_sum else 0.5,
@@ -192,9 +289,7 @@ def recommend(answers, songs_df, k=6):
     return profile, scored.iloc[0], scored.head(k)
 
 def pick_persona(profile):
-    e = profile["target_energy"]
-    v = profile["target_valence"]
-
+    e, v = profile["target_energy"], profile["target_valence"]
     if e >= 0.78 and v >= 0.78: return ("The Disco Heart", "Pure joy at full volume. You'd dance in an empty parking lot if the song hit.")
     if e >= 0.65 and v >= 0.55: return ("The Main-Character Anthem", "High energy, high serotonin. You walk into rooms like there's a soundtrack playing.")
     if e >= 0.65 and v < 0.55: return ("The Midnight Hype", "Loud, sharp, a little dark — your playlist hits like 1am in a cab.")
@@ -219,111 +314,126 @@ def fetch_song_meta(name, artist, timeout=5):
         cover = item.get("artworkUrl100", "")
         if cover: cover = cover.replace("100x100bb", "600x600bb")
         return {"cover": cover or None, "preview": item.get("previewUrl") or None}
-    except Exception as e:
+    except Exception:
         return None
 
-# --- 5. UI HTML RENDERERS ---
-def render_persona_card(name, persona_title, persona_desc, profile):
+# --- 6. UI HTML GENERATORS ---
+def render_results(name, persona_title, persona_desc, profile, top, meta, playlist):
     top_mood  = max(profile["moods"].items(),  key=lambda kv: kv[1])[0] if profile["moods"]  else "Chill"
     top_genre = max(profile["genres"].items(), key=lambda kv: kv[1])[0] if profile["genres"] else "Pop"
-    return f"""
-    <div style="padding:22px;border-radius:14px;background:linear-gradient(135deg,#163826 0%,#1a2030 60%,#2b1d3a 100%);color:#eceff4;text-align:center;margin:14px 0;">
-      <p style="color:#6ee7a7;font-size:0.78rem;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;margin:0 0 6px 0;">
-        {name}'s vibe
-      </p>
-      <h2 style="margin:4px 0 8px 0;font-size:1.7rem;">{persona_title}</h2>
-      <p style="margin:0 0 14px 0;color:#cbd5e1;">{persona_desc}</p>
-      <div>
-        <span style="padding:4px 12px;border-radius:999px;background:rgba(29,185,84,0.15);border:1px solid rgba(110,231,167,0.4);color:#6ee7a7;font-size:0.78rem;font-weight:600;margin:0 4px;">Mood · {top_mood}</span>
-        <span style="padding:4px 12px;border-radius:999px;background:rgba(29,185,84,0.15);border:1px solid rgba(110,231,167,0.4);color:#6ee7a7;font-size:0.78rem;font-weight:600;margin:0 4px;">Genre · {top_genre}</span>
-        <span style="padding:4px 12px;border-radius:999px;background:rgba(255,255,255,0.06);border:1px solid #2a2f3a;color:#cbd5e1;font-size:0.78rem;font-weight:600;margin:0 4px;">Energy {profile['target_energy']:.2f}</span>
-        <span style="padding:4px 12px;border-radius:999px;background:rgba(255,255,255,0.06);border:1px solid #2a2f3a;color:#cbd5e1;font-size:0.78rem;font-weight:600;margin:0 4px;">Valence {profile['target_valence']:.2f}</span>
+    
+    # 1. Persona Card
+    persona_html = f"""
+    <div class="persona-card">
+      <div class="persona-badge">{name}'s vibe</div>
+      <div class="persona-name">{persona_title}</div>
+      <div class="persona-desc">{persona_desc}</div>
+      <div class="tag-row">
+        <span class="tag tag-green">Mood · {top_mood}</span>
+        <span class="tag tag-green">Genre · {top_genre}</span>
+        <span class="tag tag-gray">Energy {profile['target_energy']:.2f}</span>
+        <span class="tag tag-gray">Valence {profile['target_valence']:.2f}</span>
       </div>
     </div>
     """
 
-def render_top_pick_card(top, meta):
-    cover_html = ""
-    if meta and meta.get("cover"):
-        cover_html = f'<img src="{meta["cover"]}" alt="album cover" style="width:160px;height:160px;border-radius:12px;display:block;margin:0 auto 14px;box-shadow:0 8px 22px rgba(0,0,0,0.35);" />'
-    return f"""
-    <div style="padding:22px;border:1px solid #2a2f3a;border-radius:14px;background:#1a1d24;color:#eceff4;text-align:center;margin:14px 0;">
-      <p style="color:#1ed760;font-size:0.78rem;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;margin:0 0 8px 0;">Your top pick</p>
+    # 2. Top Pick Card
+    cover_html = f'<img src="{meta["cover"]}" class="album-cover" />' if (meta and meta.get("cover")) else '<div class="album-cover" style="display:flex;align-items:center;justify-content:center;font-size:3rem;">🎵</div>'
+    preview_html = f'<div class="audio-player"><audio controls src="{meta["preview"]}"></audio></div>' if (meta and meta.get("preview")) else '<div style="margin-top:15px; color:#5c6578; font-size:0.85rem; font-style:italic;">Preview not available for this track.</div>'
+
+    top_pick_html = f"""
+    <div class="top-pick-card">
       {cover_html}
-      <h3 style="margin:0 0 4px 0;font-size:1.4rem;color:white;">{top['name']}</h3>
-      <p style="margin:0 0 12px 0;color:#9ca3af;">by {top['artist']}</p>
-      <div>
-        <span style="padding:4px 12px;border-radius:999px;background:rgba(29,185,84,0.10);border:1px solid rgba(110,231,167,0.4);color:#6ee7a7;font-size:0.78rem;font-weight:600;margin:0 4px;">{top['genre']}</span>
-        <span style="padding:4px 12px;border-radius:999px;background:rgba(29,185,84,0.10);border:1px solid rgba(110,231,167,0.4);color:#6ee7a7;font-size:0.78rem;font-weight:600;margin:0 4px;">{top['mood']}</span>
-        <span style="padding:4px 12px;border-radius:999px;background:rgba(255,255,255,0.06);border:1px solid #2a2f3a;color:#cbd5e1;font-size:0.78rem;font-weight:600;margin:0 4px;">Energy {top['energy']:.2f}</span>
-        <span style="padding:4px 12px;border-radius:999px;background:rgba(255,255,255,0.06);border:1px solid #2a2f3a;color:#cbd5e1;font-size:0.78rem;font-weight:600;margin:0 4px;">{int(top['tempo'])} BPM</span>
+      <div class="top-pick-info">
+        <div class="top-pick-eyebrow">Your top pick</div>
+        <div class="top-pick-name">{top['name']}</div>
+        <div class="top-pick-artist">by {top['artist']}</div>
+        <div class="tag-row" style="justify-content:flex-start">
+          <span class="tag tag-green">{top['genre']}</span>
+          <span class="tag tag-green">{top['mood']}</span>
+          <span class="tag tag-gray">Energy {top['energy']:.2f}</span>
+          <span class="tag tag-gray">{int(top['tempo'])} BPM</span>
+        </div>
+        {preview_html}
       </div>
     </div>
     """
 
-def build_explanation(top, profile):
-    return (
-        f"<p style='color:#cbd5e1; font-size:1rem;'><b>Why this one?</b> Your vibe profile averaged out to "
-        f"<b>energy {profile['target_energy']:.2f}</b> and <b>valence {profile['target_valence']:.2f}</b>. "
-        f"<b>{top['name']}</b> by <b>{top['artist']}</b> sits at energy {top['energy']:.2f} / valence {top['valence']:.2f}, "
-        f"with a genre and mood that match your top picks ({top['genre']} · {top['mood']}). "
-        f"It also has a popularity of {int(top['popularity'])}/100, which is the tiebreaker.</p>"
-    )
+    # 3. Explanation Box
+    explanation_html = f"""
+    <div class="explanation-box">
+      <strong>Why this one?</strong> Your vibe profile averaged to energy {profile['target_energy']:.2f} and valence {profile['target_valence']:.2f}.
+      <strong>{top['name']}</strong> by <strong>{top['artist']}</strong> sits at energy {top['energy']:.2f} / valence {top['valence']:.2f},
+      with a matching genre ({top['genre']}) and mood ({top['mood']}). Popularity score: {int(top['popularity'])}/100.
+    </div>
+    """
+
+    # 4. Playlist Tracks generator (Mimicking the HTML structure exactly)
+    track_rows_html = ""
+    for i, track in playlist.iterrows():
+        track_rows_html += f"""
+        <div class="playlist-track">
+          <div class="track-num">{i + 1}</div>
+          <div class="track-info">
+            <div class="track-name">{track['name']}</div>
+            <div class="track-artist">{track['artist']}</div>
+          </div>
+          <div class="track-meta">
+            <span class="track-tag">{track['mood']}</span>
+            <span class="track-tag">{int(track['tempo'])} BPM</span>
+          </div>
+        </div>
+        """
+
+    playlist_html = f"""
+    <div>
+      <div class="playlist-header">
+        Your BACO Station playlist
+        <span class="playlist-count">{len(playlist)} tracks</span>
+      </div>
+      {track_rows_html}
+    </div>
+    """
+
+    return persona_html + top_pick_html + explanation_html + playlist_html
 
 
-# --- 6. MAIN STREAMLIT APP ---
-st.markdown("""
-<div style="padding:18px 22px;border-radius:12px;background:linear-gradient(120deg,#1db954 0%,#1ed760 50%,#14833b 100%);color:white;margin-bottom:20px;">
-  <h2 style="margin:0; color:white;">BACO Station</h2>
-  <p style="margin:4px 0 0 0;">Pick your mood, your genre, your energy — get songs that match.</p>
-</div>
-""", unsafe_allow_html=True)
+# --- 7. MAIN APP LAYOUT ---
+st.markdown('<div class="hero-title">BACO<br><span>Station</span></div>', unsafe_allow_html=True)
+st.markdown('<div class="hero-sub">Answer 9 vibe questions. Get a song that actually fits your energy — with album art and a 30-second preview.</div>', unsafe_allow_html=True)
 
-# Load data into memory
 songs_df = load_data()
 
-# Render Form
 with st.form(key='vibe_quiz'):
-    name_input = st.text_input("Name:", placeholder="Type your name")
+    name_input = st.text_input("Your Name:", placeholder="Enter your name...")
     
     user_selections = []
     for i, q in enumerate(quiz):
+        st.markdown(f"**Question {i+1} of {len(quiz)}:** {q['title']}")
         labels = ["—"] + [opt["label"] for opt in q["options"]]
-        ans = st.selectbox(f"**{q['title']}**", labels, key=f"q_{i}")
+        ans = st.selectbox("", labels, key=f"q_{i}", label_visibility="collapsed")
         user_selections.append(ans)
+        st.write("") # small spacing
         
-    submit_button = st.form_submit_button(label='Get my vibe 🎧')
+    submit_button = st.form_submit_button(label='Get my vibe')
 
-# Process Results
 if submit_button:
     name = name_input.strip() if name_input.strip() else "Friend"
-    
-    # Map back selections to indexes
     answers = {}
+    
     for i, ans in enumerate(user_selections):
         if ans != "—":
             labels = [opt["label"] for opt in quiz[i]["options"]]
             answers[i] = labels.index(ans)
 
     if not answers:
-        st.error("Please answer at least one question, then click **Get my vibe** again.")
+        st.error("Please answer at least one question to get your vibe.")
     else:
-        with st.spinner('Curating your vibe...'):
+        with st.spinner('Scoring the dataset and fetching your vibe...'):
             profile, top, playlist = recommend(answers, songs_df)
+            playlist = playlist.reset_index(drop=True) # Reset index so numbering starts at 0 for UI rendering
             persona_title, persona_desc = pick_persona(profile)
             meta = fetch_song_meta(top["name"], top["artist"])
 
-        # Display UI
-        st.markdown(render_persona_card(name, persona_title, persona_desc, profile), unsafe_allow_html=True)
-        st.markdown(render_top_pick_card(top, meta), unsafe_allow_html=True)
-        st.markdown(build_explanation(top, profile), unsafe_allow_html=True)
-
-        if meta and meta.get("preview"):
-            st.markdown("<p style='color:#eceff4;'><b>30-second preview:</b></p>", unsafe_allow_html=True)
-            st.audio(meta["preview"], format="audio/mp4")
-        else:
-            st.markdown("<p style='color:#888;'><i>(Audio preview not available for this song.)</i></p>", unsafe_allow_html=True)
-
-        st.markdown(f"<br><p style='color:#eceff4; font-size:1.1rem;'><b>Your BACO Station playlist ({len(playlist)} tracks):</b></p>", unsafe_allow_html=True)
-        nice_cols = ["name", "artist", "genre", "mood", "energy", "valence", "tempo", "popularity"]
-        st.dataframe(playlist[nice_cols].reset_index(drop=True), use_container_width=True)
+        # Display the custom styled HTML Results
+        st.markdown(render_results(name, persona_title, persona_desc, profile, top, meta, playlist), unsafe_allow_html=True)
