@@ -120,6 +120,59 @@ div.stButton > button:hover {
 .track-tag { font-size: 0.72rem; padding: 3px 9px; border-radius: 999px; background: #1f2430; color: #5c6578; border: 1px solid rgba(255,255,255,0.07); margin-left: 5px;}
 </style>
 """, unsafe_allow_html=True)
+# --- FLOATING MUSIC NOTES DECORATION ---
+st.markdown("""
+<style>
+/* Container for the floating notes */
+.floating-notes-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none; /* Ensures you can still click the app behind them */
+    z-index: 0; /* Keeps them behind the main content */
+    overflow: hidden;
+}
+
+/* Base style for all notes */
+.float-note {
+    position: absolute;
+    bottom: -100px;
+    animation: floatUp linear infinite;
+    opacity: 0;
+}
+
+/* The floating animation */
+@keyframes floatUp {
+    0% { transform: translateY(0) rotate(0deg) scale(0.8); opacity: 0; }
+    10% { opacity: 0.6; }
+    90% { opacity: 0.6; }
+    100% { transform: translateY(-120vh) rotate(360deg) scale(1.2); opacity: 0; }
+}
+
+/* Individual note timings, positions, and colors */
+.n1 { left: 5%;  animation-duration: 14s; animation-delay: 0s; color: #1db954; font-size: 28px; }
+.n2 { left: 15%; animation-duration: 18s; animation-delay: 4s; color: #000000; text-shadow: 0 0 4px #1db954; font-size: 35px; }
+.n3 { left: 25%; animation-duration: 12s; animation-delay: 2s; color: #1ed760; font-size: 22px; }
+.n4 { left: 40%; animation-duration: 20s; animation-delay: 7s; color: #000000; text-shadow: 0 0 3px #1ed760; font-size: 40px; }
+.n5 { left: 55%; animation-duration: 15s; animation-delay: 1s; color: #1db954; font-size: 30px; }
+.n6 { left: 70%; animation-duration: 22s; animation-delay: 5s; color: #000000; text-shadow: 0 0 5px #1db954; font-size: 32px; }
+.n7 { left: 85%; animation-duration: 16s; animation-delay: 3s; color: #1ed760; font-size: 26px; }
+.n8 { left: 95%; animation-duration: 19s; animation-delay: 8s; color: #000000; text-shadow: 0 0 4px #1ed760; font-size: 38px; }
+</style>
+
+<div class="floating-notes-container">
+    <div class="float-note n1">🎵</div>
+    <div class="float-note n2">🎶</div>
+    <div class="float-note n3">🎵</div>
+    <div class="float-note n4">🎶</div>
+    <div class="float-note n5">🎵</div>
+    <div class="float-note n6">🎶</div>
+    <div class="float-note n7">🎵</div>
+    <div class="float-note n8">🎶</div>
+</div>
+""", unsafe_allow_html=True)
 
 # --- 3. DATA LOADING & CACHING ---
 @st.cache_data
@@ -412,54 +465,14 @@ if submit_button:
     if not answers:
         st.error("Please answer at least one question to get your vibe.")
     else:
-        # 1. Create a placeholder for our animation
-        animation_placeholder = st.empty()
-        
-        # 2. Inject the CSS and HTML for the floating notes
-        animation_placeholder.markdown("""
-        <style>
-        .floating-notes {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            pointer-events: none; z-index: 9999; overflow: hidden;
-        }
-        .f-note {
-            position: absolute; bottom: -10%;
-            animation: floatUp 2s ease-in infinite;
-        }
-        /* Green Notes */
-        .f-note:nth-child(1) { left: 15%; animation-duration: 2.5s; font-size: 3rem; color: #1db954; }
-        .f-note:nth-child(3) { left: 55%; animation-duration: 3s; animation-delay: 0.3s; font-size: 4rem; color: #1db954; }
-        .f-note:nth-child(5) { left: 85%; animation-duration: 2.8s; animation-delay: 0.6s; font-size: 3.5rem; color: #1db954; }
-        
-        /* Black Notes (with green glow to be visible on dark background) */
-        .f-note:nth-child(2) { left: 35%; animation-duration: 2.2s; animation-delay: 0.5s; font-size: 2.5rem; color: #000000; text-shadow: 0 0 6px #1db954; }
-        .f-note:nth-child(4) { left: 75%; animation-duration: 2.6s; animation-delay: 0.2s; font-size: 3rem; color: #000000; text-shadow: 0 0 6px #1db954; }
-        .f-note:nth-child(6) { left: 5%; animation-duration: 3.2s; animation-delay: 0.8s; font-size: 2rem; color: #000000; text-shadow: 0 0 6px #1db954; }
-
-        @keyframes floatUp {
-            0% { transform: translateY(0) rotate(-15deg); opacity: 0; }
-            10% { opacity: 1; }
-            90% { opacity: 1; }
-            100% { transform: translateY(-110vh) rotate(25deg); opacity: 0; }
-        }
-        </style>
-        <div class="floating-notes">
-            <div class="f-note">🎵</div>
-            <div class="f-note">🎶</div>
-            <div class="f-note">🎵</div>
-            <div class="f-note">🎶</div>
-            <div class="f-note">🎵</div>
-            <div class="f-note">🎶</div>
-        </div>
-        """, unsafe_allow_html=True)
-
         with st.spinner('Scoring the dataset and fetching your vibe...'):
-            time.sleep(2) 
-            
             profile, top, playlist = recommend(answers, songs_df)
             playlist = playlist.reset_index(drop=True)
             persona_title, persona_desc = pick_persona(profile)
             meta = fetch_song_meta(top["name"], top["artist"])
-        animation_placeholder.empty()
+
+        # Display the custom HTML Results. 
         final_html = render_results(name, persona_title, persona_desc, profile, top, meta, playlist)
+        
+        # Using st.markdown with unsafe_allow_html will now successfully render the blocks instead of printing them!
         st.markdown(final_html, unsafe_allow_html=True)
