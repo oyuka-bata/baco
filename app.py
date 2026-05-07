@@ -38,19 +38,89 @@ songs = load_and_setup_db()
 
 # --- 3. THE VIBE QUIZ DATA ---
 quiz = [
-    {"title": "Which Hogwarts house feels most like you?", "options": [
-        {"label": "Gryffindor — bold, loud, main character", "w": {"energy": 0.85, "valence": 0.70, "genres": {"Rock": 3}, "moods": {"Energetic": 3}}},
-        {"label": "Slytherin — cool, sharp, powerful", "w": {"energy": 0.70, "valence": 0.30, "genres": {"Electronic": 3}, "moods": {"Energetic": 2}}},
-        {"label": "Ravenclaw — thoughtful, curious", "w": {"energy": 0.30, "valence": 0.40, "genres": {"Classical": 3}, "moods": {"Focus": 3}}},
-        {"label": "Hufflepuff — warm, soft, comfort", "w": {"energy": 0.45, "valence": 0.85, "genres": {"Pop": 2}, "moods": {"Happy": 3}}},
-    ]},
-    {"title": "Pick your current aesthetic", "options": [
-        {"label": "Cottagecore — fields and flowers", "w": {"energy": 0.35, "valence": 0.75, "genres": {"Indie": 3}, "moods": {"Chill": 3}}},
-        {"label": "Dark academia — old libraries", "w": {"energy": 0.30, "valence": 0.30, "genres": {"Classical": 3}, "moods": {"Focus": 3}}},
-        {"label": "Y2K — glitter and party", "w": {"energy": 0.85, "valence": 0.85, "genres": {"Pop": 3}, "moods": {"Happy": 3}}},
-        {"label": "Clean girl — matcha and gold hoops", "w": {"energy": 0.45, "valence": 0.65, "genres": {"R&B": 2}, "moods": {"Chill": 3}}},
-    ]}
+    {
+        "title": "Which Hogwarts house feels most like you?",
+        "options": [
+            {"label": "Gryffindor — bold, loud, main character",       "w": {"energy": 0.85, "valence": 0.70, "genres": {"Rock": 3, "Pop": 2, "Hip-Hop": 2}, "moods": {"Energetic": 3, "Happy": 1}}},
+            {"label": "Slytherin — cool, sharp, low-key powerful",     "w": {"energy": 0.70, "valence": 0.30, "genres": {"Hip-Hop": 3, "Electronic": 3, "R&B": 2}, "moods": {"Energetic": 2, "Chill": 1}}},
+            {"label": "Ravenclaw — thoughtful, curious, in your head", "w": {"energy": 0.30, "valence": 0.40, "genres": {"Indie": 3, "Classical": 3, "Jazz": 2}, "moods": {"Focus": 3, "Chill": 1}}},
+            {"label": "Hufflepuff — warm, soft, comfort-food coded",   "w": {"energy": 0.45, "valence": 0.85, "genres": {"Pop": 2, "Indie": 2, "R&B": 2}, "moods": {"Happy": 3, "Chill": 2}}},
+        ],
+    },
+    {
+        "title": "Pick your current aesthetic",
+        "options": [
+            {"label": "Cottagecore — sundress, sourdough, fields",        "w": {"energy": 0.35, "valence": 0.75, "genres": {"Indie": 3, "Classical": 2, "Pop": 1}, "moods": {"Happy": 2, "Chill": 2}}},
+            {"label": "Dark academia — tweed, candles, old library",      "w": {"energy": 0.30, "valence": 0.30, "genres": {"Classical": 3, "Indie": 2, "Jazz": 2}, "moods": {"Focus": 3, "Sad": 1}}},
+            {"label": "Y2K — glitter, low-rise, butterfly clips",         "w": {"energy": 0.85, "valence": 0.85, "genres": {"Pop": 3, "Electronic": 2, "Hip-Hop": 2}, "moods": {"Energetic": 2, "Happy": 3}}},
+            {"label": "Clean girl — slicked back, gold hoops, matcha",    "w": {"energy": 0.45, "valence": 0.65, "genres": {"Pop": 2, "R&B": 2, "Indie": 2}, "moods": {"Chill": 3, "Happy": 1}}},
+        ],
+    },
+    {
+        "title": "Pick a season that feels like you right now",
+        "options": [
+            {"label": "Spring — new crush, green, light",         "w": {"energy": 0.55, "valence": 0.85, "genres": {"Pop": 2, "Indie": 2}, "moods": {"Happy": 3}}},
+            {"label": "Summer — sunburn, party, no plans",        "w": {"energy": 0.85, "valence": 0.80, "genres": {"Pop": 2, "Hip-Hop": 2, "Electronic": 2}, "moods": {"Energetic": 2, "Happy": 2}}},
+            {"label": "Autumn — sweater weather, long walks",     "w": {"energy": 0.45, "valence": 0.40, "genres": {"Indie": 3, "R&B": 2, "Jazz": 1}, "moods": {"Chill": 3, "Sad": 1}}},
+            {"label": "Winter — quiet, candle, big feelings",     "w": {"energy": 0.20, "valence": 0.20, "genres": {"Classical": 3, "Indie": 2, "R&B": 1}, "moods": {"Sad": 2, "Focus": 2}}},
+        ],
+    },
+    {
+        "title": "If you had to move tomorrow…",
+        "options": [
+            {"label": "Paris — slow mornings, cafés, jazz",            "w": {"energy": 0.40, "valence": 0.60, "genres": {"Jazz": 3, "Indie": 2, "Classical": 2}, "moods": {"Chill": 3, "Happy": 1}}},
+            {"label": "Tokyo — neon, vending machines, 7-Elevens",     "w": {"energy": 0.85, "valence": 0.65, "genres": {"Electronic": 3, "Pop": 2, "Hip-Hop": 2}, "moods": {"Energetic": 3}}},
+            {"label": "New York — bagels, basslines, never sleeps",    "w": {"energy": 0.80, "valence": 0.55, "genres": {"Hip-Hop": 3, "R&B": 2, "Rock": 1}, "moods": {"Energetic": 2, "Chill": 1}}},
+            {"label": "Reykjavik — cold air, glaciers, Northern Lights","w": {"energy": 0.25, "valence": 0.30, "genres": {"Indie": 2, "Classical": 3, "Electronic": 1}, "moods": {"Focus": 2, "Sad": 2}}},
+        ],
+    },
+    {
+        "title": "Your dream Saturday night looks like…",
+        "options": [
+            {"label": "Out dancing — with friends, loud, sweaty",      "w": {"energy": 0.90, "valence": 0.75, "genres": {"Electronic": 3, "Hip-Hop": 2, "Pop": 2}, "moods": {"Energetic": 3}}},
+            {"label": "Cozy at home — movie, blanket, snacks",         "w": {"energy": 0.35, "valence": 0.55, "genres": {"Indie": 2, "R&B": 2, "Pop": 1}, "moods": {"Chill": 3}}},
+            {"label": "Late-night drive — window down, deep playlist", "w": {"energy": 0.55, "valence": 0.30, "genres": {"R&B": 2, "Indie": 2, "Hip-Hop": 1, "Pop": 1}, "moods": {"Chill": 2, "Sad": 1}}},
+            {"label": "Studying / focused — headphones in",            "w": {"energy": 0.20, "valence": 0.35, "genres": {"Classical": 3, "Jazz": 2, "Electronic": 1}, "moods": {"Focus": 3}}},
+        ],
+    },
+    {
+        "title": "Pick your drink",
+        "options": [
+            {"label": "Iced coffee — caffeinated and ready",   "w": {"energy": 0.75, "valence": 0.65, "genres": {"Pop": 2, "Hip-Hop": 2}, "moods": {"Energetic": 2, "Happy": 1}}},
+            {"label": "Hot tea — slow morning, gentle",         "w": {"energy": 0.25, "valence": 0.55, "genres": {"Indie": 2, "Classical": 2, "Jazz": 1}, "moods": {"Chill": 2, "Focus": 1}}},
+            {"label": "Cocktail — it's the weekend",            "w": {"energy": 0.85, "valence": 0.70, "genres": {"Electronic": 3, "Pop": 2, "R&B": 1}, "moods": {"Energetic": 2}}},
+            {"label": "Just water — locked in, focused",        "w": {"energy": 0.20, "valence": 0.40, "genres": {"Classical": 2, "Jazz": 2, "Indie": 1}, "moods": {"Focus": 3}}},
+        ],
+    },
+    {
+        "title": "Your texting style is…",
+        "options": [
+            {"label": "lol same all lowercase — vibes only",                  "w": {"energy": 0.55, "valence": 0.65, "genres": {"Indie": 2, "Pop": 2}, "moods": {"Chill": 2, "Happy": 1}}},
+            {"label": "Perfect grammar. With periods.",                       "w": {"energy": 0.30, "valence": 0.45, "genres": {"Classical": 2, "Jazz": 2, "Indie": 1}, "moods": {"Focus": 3}}},
+            {"label": "Voice memos, mostly — talking is faster",              "w": {"energy": 0.85, "valence": 0.75, "genres": {"Hip-Hop": 3, "Pop": 2, "Rock": 1}, "moods": {"Energetic": 3, "Happy": 1}}},
+            {"label": "17-paragraph essays — feelings need full context",     "w": {"energy": 0.45, "valence": 0.30, "genres": {"Indie": 3, "R&B": 2, "Classical": 1}, "moods": {"Sad": 2, "Chill": 1}}},
+        ],
+    },
+    {
+        "title": "What is the weather inside your head right now?",
+        "options": [
+            {"label": "Sunny — everything's clicking",     "w": {"energy": 0.75, "valence": 0.95, "genres": {"Pop": 2, "Indie": 1}, "moods": {"Happy": 3}}},
+            {"label": "Cloudy — vibes, but soft",          "w": {"energy": 0.45, "valence": 0.50, "genres": {"Indie": 2, "R&B": 2}, "moods": {"Chill": 3}}},
+            {"label": "Stormy — big mood, lots of energy", "w": {"energy": 0.90, "valence": 0.40, "genres": {"Rock": 3, "Hip-Hop": 2, "Electronic": 1}, "moods": {"Energetic": 3}}},
+            {"label": "Rainy — in my feelings",            "w": {"energy": 0.30, "valence": 0.15, "genres": {"Indie": 2, "R&B": 2, "Classical": 1}, "moods": {"Sad": 3}}},
+        ],
+    },
+    {
+        "title": "At a party, you're usually…",
+        "options": [
+            {"label": "On the dance floor — losing earrings to the rhythm",       "w": {"energy": 0.95, "valence": 0.85, "genres": {"Electronic": 3, "Pop": 2, "Hip-Hop": 2}, "moods": {"Energetic": 3, "Happy": 2}}},
+            {"label": "Deep in the kitchen — life-changing chats with strangers", "w": {"energy": 0.40, "valence": 0.55, "genres": {"Indie": 2, "R&B": 2, "Jazz": 2}, "moods": {"Chill": 3}}},
+            {"label": "On aux duty — DJ unprovoked, no skips allowed",            "w": {"energy": 0.75, "valence": 0.70, "genres": {"Hip-Hop": 3, "Electronic": 2, "Pop": 2}, "moods": {"Energetic": 2, "Happy": 1}}},
+            {"label": "Already left — bed always wins, no notes",                 "w": {"energy": 0.25, "valence": 0.35, "genres": {"Indie": 2, "Classical": 2, "R&B": 1}, "moods": {"Chill": 1, "Sad": 2, "Focus": 1}}},
+        ],
+    },
 ]
+
 
 # --- 4. HELPER FUNCTIONS ---
 def fetch_song_meta(name, artist):
