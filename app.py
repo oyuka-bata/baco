@@ -277,8 +277,7 @@ def score_song(row, profile):
 def recommend(answers, songs_df, k=6):
     profile = aggregate_profile(answers)
     scored  = songs_df.copy()
-    scored["match_score"] = scored.apply(lambda r: score_score(r, profile), axis=1) if "match_score" not in scored.columns else scored.apply(lambda r: score_song(r, profile), axis=1) # Fallback handling
-    scored["match_score"] = scored.apply(lambda r: score_song(r, profile), axis=1)
+    scored["match_score"] = scored.apply(lambda r: score_song(r, profile), axis=1)  
     scored = scored.sort_values("match_score", ascending=False)
     return profile, scored.iloc[0], scored.head(k)
 
