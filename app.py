@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import sqlite3
 import requests
+import time
 
 # --- 1. PAGE CONFIG ---
 st.set_page_config(page_title="BACO Station", page_icon="🎵", layout="centered")
@@ -411,14 +412,54 @@ if submit_button:
     if not answers:
         st.error("Please answer at least one question to get your vibe.")
     else:
+        # 1. Create a placeholder for our animation
+        animation_placeholder = st.empty()
+        
+        # 2. Inject the CSS and HTML for the floating notes
+        animation_placeholder.markdown("""
+        <style>
+        .floating-notes {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 9999; overflow: hidden;
+        }
+        .f-note {
+            position: absolute; bottom: -10%;
+            animation: floatUp 2s ease-in infinite;
+        }
+        /* Green Notes */
+        .f-note:nth-child(1) { left: 15%; animation-duration: 2.5s; font-size: 3rem; color: #1db954; }
+        .f-note:nth-child(3) { left: 55%; animation-duration: 3s; animation-delay: 0.3s; font-size: 4rem; color: #1db954; }
+        .f-note:nth-child(5) { left: 85%; animation-duration: 2.8s; animation-delay: 0.6s; font-size: 3.5rem; color: #1db954; }
+        
+        /* Black Notes (with green glow to be visible on dark background) */
+        .f-note:nth-child(2) { left: 35%; animation-duration: 2.2s; animation-delay: 0.5s; font-size: 2.5rem; color: #000000; text-shadow: 0 0 6px #1db954; }
+        .f-note:nth-child(4) { left: 75%; animation-duration: 2.6s; animation-delay: 0.2s; font-size: 3rem; color: #000000; text-shadow: 0 0 6px #1db954; }
+        .f-note:nth-child(6) { left: 5%; animation-duration: 3.2s; animation-delay: 0.8s; font-size: 2rem; color: #000000; text-shadow: 0 0 6px #1db954; }
+
+        @keyframes floatUp {
+            0% { transform: translateY(0) rotate(-15deg); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-110vh) rotate(25deg); opacity: 0; }
+        }
+        </style>
+        <div class="floating-notes">
+            <div class="f-note">🎵</div>
+            <div class="f-note">🎶</div>
+            <div class="f-note">🎵</div>
+            <div class="f-note">🎶</div>
+            <div class="f-note">🎵</div>
+            <div class="f-note">🎶</div>
+        </div>
+        """, unsafe_allow_html=True)
+
         with st.spinner('Scoring the dataset and fetching your vibe...'):
+            time.sleep(2) 
+            
             profile, top, playlist = recommend(answers, songs_df)
             playlist = playlist.reset_index(drop=True)
             persona_title, persona_desc = pick_persona(profile)
             meta = fetch_song_meta(top["name"], top["artist"])
-
-        # Display the custom HTML Results. 
+        animation_placeholder.empty()
         final_html = render_results(name, persona_title, persona_desc, profile, top, meta, playlist)
-        
-        # Using st.markdown with unsafe_allow_html will now successfully render the blocks instead of printing them!
         st.markdown(final_html, unsafe_allow_html=True)
