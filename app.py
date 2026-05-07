@@ -7,123 +7,116 @@ import requests
 st.set_page_config(page_title="BACO Station", page_icon="🎵", layout="centered")
 
 # --- 2. CUSTOM SPOTIFY-LIKE CSS INJECTION ---
-# This mirrors the styling from your uploaded HTML file
 st.markdown("""
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,400;0,500;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,400;0,500;1,400&display=swap');
 
-    /* Global Streamlit App Style overrides */
-    .stApp {
-        background-color: #0a0c0f;
-        color: #f0f2f5;
-        font-family: 'DM Sans', sans-serif;
-    }
-    
-    header { visibility: hidden; } /* Hide the default Streamlit header */
+.stApp {
+    background-color: #0a0c0f;
+    color: #f0f2f5;
+    font-family: 'DM Sans', sans-serif;
+}
 
-    /* Typography */
-    h1, h2, h3, .stMarkdown p strong {
-        font-family: 'Syne', sans-serif;
-        color: #ffffff;
-    }
+header { visibility: hidden; }
 
-    /* Style Text Inputs and Selectboxes */
-    div[data-baseweb="select"] > div, 
-    div[data-baseweb="input"] > div {
-        background-color: #111318 !important;
-        border: 1px solid rgba(255,255,255,0.07) !important;
-        border-radius: 8px;
-        color: #f0f2f5 !important;
-    }
-    
-    /* Input focus borders */
-    div[data-baseweb="select"] > div:focus-within, 
-    div[data-baseweb="input"] > div:focus-within {
-        border-color: #1db954 !important;
-    }
+h1, h2, h3, .stMarkdown p strong {
+    font-family: 'Syne', sans-serif;
+    color: #ffffff;
+}
 
-    /* Style the main Form Submit Button */
-    div.stButton > button {
-        background-color: #1db954;
-        color: #000000;
-        border: none;
-        border-radius: 999px;
-        font-family: 'Syne', sans-serif;
-        font-weight: 700;
-        font-size: 1rem;
-        padding: 0.5rem 2rem;
-        transition: transform 0.15s, background 0.15s;
-        width: 100%;
-        margin-top: 20px;
-    }
-    
-    div.stButton > button:hover {
-        background-color: #1ed760;
-        color: #000000;
-    }
+div[data-baseweb="select"] > div, 
+div[data-baseweb="input"] > div {
+    background-color: #111318 !important;
+    border: 1px solid rgba(255,255,255,0.07) !important;
+    border-radius: 8px;
+    color: #f0f2f5 !important;
+}
 
-    /* Custom CSS Classes for HTML Results (mirrored from your HTML) */
-    .hero-title { font-family: 'Syne', sans-serif; font-size: 4rem; font-weight: 800; line-height: 0.95; margin-bottom: 10px; text-align: center; }
-    .hero-title span { color: #1db954; }
-    .hero-sub { color: #9aa3b2; text-align: center; font-size: 1.1rem; margin-bottom: 40px; font-weight: 300;}
+div[data-baseweb="select"] > div:focus-within, 
+div[data-baseweb="input"] > div:focus-within {
+    border-color: #1db954 !important;
+}
 
-    .persona-card {
-        background: #111318;
-        border: 1px solid rgba(255,255,255,0.07);
-        border-radius: 14px;
-        padding: 36px;
-        margin-bottom: 20px;
-        text-align: center;
-        background: linear-gradient(135deg, rgba(29,185,84,0.08) 0%, rgba(29,185,84,0.02) 50%, rgba(80,50,120,0.06) 100%);
-    }
-    .persona-badge { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #1db954; margin-bottom: 10px; }
-    .persona-name { font-family: 'Syne', sans-serif; font-size: 2rem; font-weight: 800; margin-bottom: 10px; letter-spacing: -0.02em; }
-    .persona-desc { color: #9aa3b2; font-size: 0.95rem; margin: 0 auto 20px; font-style: italic; }
-    
-    .tag-row { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
-    .tag { padding: 5px 14px; border-radius: 999px; font-size: 0.78rem; font-weight: 600; }
-    .tag-green { background: rgba(29,185,84,0.12); border: 1px solid rgba(29,185,84,0.35); color: #6ee7a7; }
-    .tag-gray { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.13); color: #9aa3b2; }
+div.stButton > button {
+    background-color: #1db954;
+    color: #000000;
+    border: none;
+    border-radius: 999px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+    padding: 0.5rem 2rem;
+    transition: transform 0.15s, background 0.15s;
+    width: 100%;
+    margin-top: 20px;
+}
 
-    .top-pick-card {
-        background: #111318;
-        border: 1px solid rgba(255,255,255,0.07);
-        border-radius: 14px;
-        padding: 28px;
-        margin-bottom: 20px;
-        display: flex;
-        gap: 24px;
-        align-items: flex-start;
-    }
-    .album-cover { width: 140px; height: 140px; border-radius: 10px; object-fit: cover; flex-shrink: 0; background: #1f2430; }
-    .top-pick-info { flex: 1; }
-    .top-pick-eyebrow { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #1db954; margin-bottom: 8px; }
-    .top-pick-name { font-family: 'Syne', sans-serif; font-size: 1.5rem; font-weight: 700; margin-bottom: 4px; line-height: 1.2; }
-    .top-pick-artist { color: #9aa3b2; margin-bottom: 16px; font-size: 0.95rem; }
-    .audio-player audio { width: 100%; filter: invert(1) hue-rotate(180deg); margin-top: 15px; } /* Makes standard audio player match dark mode */
+div.stButton > button:hover {
+    background-color: #1ed760;
+    color: #000000;
+}
 
-    .explanation-box {
-        background: #111318;
-        border: 1px solid rgba(255,255,255,0.07);
-        border-left: 3px solid #1db954;
-        border-radius: 8px;
-        padding: 18px 20px;
-        margin-bottom: 20px;
-        font-size: 0.9rem;
-        color: #9aa3b2;
-        line-height: 1.7;
-    }
+.hero-title { font-family: 'Syne', sans-serif; font-size: 4rem; font-weight: 800; line-height: 0.95; margin-bottom: 10px; text-align: center; }
+.hero-title span { color: #1db954; }
+.hero-sub { color: #9aa3b2; text-align: center; font-size: 1.1rem; margin-bottom: 40px; font-weight: 300;}
 
-    .playlist-header { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; margin-bottom: 12px; margin-top: 30px; display: flex; align-items: center; gap: 10px; }
-    .playlist-count { font-size: 0.75rem; background: #1f2430; border: 1px solid rgba(255,255,255,0.13); color: #9aa3b2; padding: 3px 10px; border-radius: 999px; font-family: 'DM Sans', sans-serif; font-weight: 500; }
-    
-    .playlist-track { display: flex; align-items: center; gap: 14px; padding: 14px 18px; border-radius: 8px; border: 1px solid transparent; transition: background 0.15s; }
-    .playlist-track:hover { background: #111318; border-color: rgba(255,255,255,0.07); }
-    .track-num { width: 22px; font-size: 0.8rem; color: #5c6578; text-align: center; flex-shrink: 0; }
-    .track-info { flex: 1; min-width: 0; }
-    .track-name { font-weight: 500; font-size: 0.93rem; color: #f0f2f5; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .track-artist { font-size: 0.8rem; color: #5c6578; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .track-tag { font-size: 0.72rem; padding: 3px 9px; border-radius: 999px; background: #1f2430; color: #5c6578; border: 1px solid rgba(255,255,255,0.07); margin-left: 5px;}
+.persona-card {
+    background: #111318;
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 14px;
+    padding: 36px;
+    margin-bottom: 20px;
+    text-align: center;
+    background: linear-gradient(135deg, rgba(29,185,84,0.08) 0%, rgba(29,185,84,0.02) 50%, rgba(80,50,120,0.06) 100%);
+}
+.persona-badge { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #1db954; margin-bottom: 10px; }
+.persona-name { font-family: 'Syne', sans-serif; font-size: 2rem; font-weight: 800; margin-bottom: 10px; letter-spacing: -0.02em; }
+.persona-desc { color: #9aa3b2; font-size: 0.95rem; margin: 0 auto 20px; font-style: italic; }
+
+.tag-row { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+.tag { padding: 5px 14px; border-radius: 999px; font-size: 0.78rem; font-weight: 600; }
+.tag-green { background: rgba(29,185,84,0.12); border: 1px solid rgba(29,185,84,0.35); color: #6ee7a7; }
+.tag-gray { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.13); color: #9aa3b2; }
+
+.top-pick-card {
+    background: #111318;
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 14px;
+    padding: 28px;
+    margin-bottom: 20px;
+    display: flex;
+    gap: 24px;
+    align-items: flex-start;
+}
+.album-cover { width: 140px; height: 140px; border-radius: 10px; object-fit: cover; flex-shrink: 0; background: #1f2430; }
+.top-pick-info { flex: 1; }
+.top-pick-eyebrow { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #1db954; margin-bottom: 8px; }
+.top-pick-name { font-family: 'Syne', sans-serif; font-size: 1.5rem; font-weight: 700; margin-bottom: 4px; line-height: 1.2; }
+.top-pick-artist { color: #9aa3b2; margin-bottom: 16px; font-size: 0.95rem; }
+.audio-player audio { width: 100%; filter: invert(1) hue-rotate(180deg); margin-top: 15px; }
+
+.explanation-box {
+    background: #111318;
+    border: 1px solid rgba(255,255,255,0.07);
+    border-left: 3px solid #1db954;
+    border-radius: 8px;
+    padding: 18px 20px;
+    margin-bottom: 20px;
+    font-size: 0.9rem;
+    color: #9aa3b2;
+    line-height: 1.7;
+}
+
+.playlist-header { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; margin-bottom: 12px; margin-top: 30px; display: flex; align-items: center; gap: 10px; }
+.playlist-count { font-size: 0.75rem; background: #1f2430; border: 1px solid rgba(255,255,255,0.13); color: #9aa3b2; padding: 3px 10px; border-radius: 999px; font-family: 'DM Sans', sans-serif; font-weight: 500; }
+
+.playlist-track { display: flex; align-items: center; gap: 14px; padding: 14px 18px; border-radius: 8px; border: 1px solid transparent; transition: background 0.15s; }
+.playlist-track:hover { background: #111318; border-color: rgba(255,255,255,0.07); }
+.track-num { width: 22px; font-size: 0.8rem; color: #5c6578; text-align: center; flex-shrink: 0; }
+.track-info { flex: 1; min-width: 0; }
+.track-name { font-weight: 500; font-size: 0.93rem; color: #f0f2f5; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.track-artist { font-size: 0.8rem; color: #5c6578; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.track-tag { font-size: 0.72rem; padding: 3px 9px; border-radius: 999px; background: #1f2430; color: #5c6578; border: 1px solid rgba(255,255,255,0.07); margin-left: 5px;}
 </style>
 """, unsafe_allow_html=True)
 
@@ -167,7 +160,7 @@ def load_data():
     songs["mood"] = songs.apply(assign_mood_to_song, axis=1)
     return songs
 
-# --- 4. QUIZ DATA (Exactly 9 Questions) ---
+# --- 4. QUIZ DATA ---
 quiz = [
     {
         "title": "Which Hogwarts house feels most like you?",
@@ -284,6 +277,7 @@ def score_song(row, profile):
 def recommend(answers, songs_df, k=6):
     profile = aggregate_profile(answers)
     scored  = songs_df.copy()
+    scored["match_score"] = scored.apply(lambda r: score_score(r, profile), axis=1) if "match_score" not in scored.columns else scored.apply(lambda r: score_song(r, profile), axis=1) # Fallback handling
     scored["match_score"] = scored.apply(lambda r: score_song(r, profile), axis=1)
     scored = scored.sort_values("match_score", ascending=False)
     return profile, scored.iloc[0], scored.head(k)
@@ -317,83 +311,70 @@ def fetch_song_meta(name, artist, timeout=5):
     except Exception:
         return None
 
-# --- 6. UI HTML GENERATORS ---
+# --- 6. UI HTML GENERATORS (Indentation removed to prevent Markdown code block rendering) ---
 def render_results(name, persona_title, persona_desc, profile, top, meta, playlist):
     top_mood  = max(profile["moods"].items(),  key=lambda kv: kv[1])[0] if profile["moods"]  else "Chill"
     top_genre = max(profile["genres"].items(), key=lambda kv: kv[1])[0] if profile["genres"] else "Pop"
     
-    # 1. Persona Card
-    persona_html = f"""
-    <div class="persona-card">
-      <div class="persona-badge">{name}'s vibe</div>
-      <div class="persona-name">{persona_title}</div>
-      <div class="persona-desc">{persona_desc}</div>
-      <div class="tag-row">
-        <span class="tag tag-green">Mood · {top_mood}</span>
-        <span class="tag tag-green">Genre · {top_genre}</span>
-        <span class="tag tag-gray">Energy {profile['target_energy']:.2f}</span>
-        <span class="tag tag-gray">Valence {profile['target_valence']:.2f}</span>
-      </div>
-    </div>
-    """
+    # Notice: NO leading spaces before the HTML tags so Streamlit doesn't turn it into a Code Block!
+    persona_html = f"""<div class="persona-card">
+<div class="persona-badge">{name}'s vibe</div>
+<div class="persona-name">{persona_title}</div>
+<div class="persona-desc">{persona_desc}</div>
+<div class="tag-row">
+<span class="tag tag-green">Mood · {top_mood}</span>
+<span class="tag tag-green">Genre · {top_genre}</span>
+<span class="tag tag-gray">Energy {profile['target_energy']:.2f}</span>
+<span class="tag tag-gray">Valence {profile['target_valence']:.2f}</span>
+</div>
+</div>"""
 
-    # 2. Top Pick Card
     cover_html = f'<img src="{meta["cover"]}" class="album-cover" />' if (meta and meta.get("cover")) else '<div class="album-cover" style="display:flex;align-items:center;justify-content:center;font-size:3rem;">🎵</div>'
     preview_html = f'<div class="audio-player"><audio controls src="{meta["preview"]}"></audio></div>' if (meta and meta.get("preview")) else '<div style="margin-top:15px; color:#5c6578; font-size:0.85rem; font-style:italic;">Preview not available for this track.</div>'
 
-    top_pick_html = f"""
-    <div class="top-pick-card">
-      {cover_html}
-      <div class="top-pick-info">
-        <div class="top-pick-eyebrow">Your top pick</div>
-        <div class="top-pick-name">{top['name']}</div>
-        <div class="top-pick-artist">by {top['artist']}</div>
-        <div class="tag-row" style="justify-content:flex-start">
-          <span class="tag tag-green">{top['genre']}</span>
-          <span class="tag tag-green">{top['mood']}</span>
-          <span class="tag tag-gray">Energy {top['energy']:.2f}</span>
-          <span class="tag tag-gray">{int(top['tempo'])} BPM</span>
-        </div>
-        {preview_html}
-      </div>
-    </div>
-    """
+    top_pick_html = f"""<div class="top-pick-card">
+{cover_html}
+<div class="top-pick-info">
+<div class="top-pick-eyebrow">Your top pick</div>
+<div class="top-pick-name">{top['name']}</div>
+<div class="top-pick-artist">by {top['artist']}</div>
+<div class="tag-row" style="justify-content:flex-start">
+<span class="tag tag-green">{top['genre']}</span>
+<span class="tag tag-green">{top['mood']}</span>
+<span class="tag tag-gray">Energy {top['energy']:.2f}</span>
+<span class="tag tag-gray">{int(top['tempo'])} BPM</span>
+</div>
+{preview_html}
+</div>
+</div>"""
 
-    # 3. Explanation Box
-    explanation_html = f"""
-    <div class="explanation-box">
-      <strong>Why this one?</strong> Your vibe profile averaged to energy {profile['target_energy']:.2f} and valence {profile['target_valence']:.2f}.
-      <strong>{top['name']}</strong> by <strong>{top['artist']}</strong> sits at energy {top['energy']:.2f} / valence {top['valence']:.2f},
-      with a matching genre ({top['genre']}) and mood ({top['mood']}). Popularity score: {int(top['popularity'])}/100.
-    </div>
-    """
+    explanation_html = f"""<div class="explanation-box">
+<strong>Why this one?</strong> Your vibe profile averaged to energy {profile['target_energy']:.2f} and valence {profile['target_valence']:.2f}.
+<strong>{top['name']}</strong> by <strong>{top['artist']}</strong> sits at energy {top['energy']:.2f} / valence {top['valence']:.2f},
+with a matching genre ({top['genre']}) and mood ({top['mood']}). Popularity score: {int(top['popularity'])}/100.
+</div>"""
 
-    # 4. Playlist Tracks generator (Mimicking the HTML structure exactly)
     track_rows_html = ""
     for i, track in playlist.iterrows():
-        track_rows_html += f"""
-        <div class="playlist-track">
-          <div class="track-num">{i + 1}</div>
-          <div class="track-info">
-            <div class="track-name">{track['name']}</div>
-            <div class="track-artist">{track['artist']}</div>
-          </div>
-          <div class="track-meta">
-            <span class="track-tag">{track['mood']}</span>
-            <span class="track-tag">{int(track['tempo'])} BPM</span>
-          </div>
-        </div>
-        """
+        track_rows_html += f"""<div class="playlist-track">
+<div class="track-num">{i + 1}</div>
+<div class="track-info">
+<div class="track-name">{track['name']}</div>
+<div class="track-artist">{track['artist']}</div>
+</div>
+<div class="track-meta">
+<span class="track-tag">{track['mood']}</span>
+<span class="track-tag">{int(track['tempo'])} BPM</span>
+</div>
+</div>"""
 
-    playlist_html = f"""
-    <div>
-      <div class="playlist-header">
-        Your BACO Station playlist
-        <span class="playlist-count">{len(playlist)} tracks</span>
-      </div>
-      {track_rows_html}
-    </div>
-    """
+    playlist_html = f"""<div>
+<div class="playlist-header">
+Your BACO Station playlist
+<span class="playlist-count">{len(playlist)} tracks</span>
+</div>
+{track_rows_html}
+</div>"""
 
     return persona_html + top_pick_html + explanation_html + playlist_html
 
@@ -431,9 +412,12 @@ if submit_button:
     else:
         with st.spinner('Scoring the dataset and fetching your vibe...'):
             profile, top, playlist = recommend(answers, songs_df)
-            playlist = playlist.reset_index(drop=True) # Reset index so numbering starts at 0 for UI rendering
+            playlist = playlist.reset_index(drop=True)
             persona_title, persona_desc = pick_persona(profile)
             meta = fetch_song_meta(top["name"], top["artist"])
 
-        # Display the custom styled HTML Results
-        st.markdown(render_results(name, persona_title, persona_desc, profile, top, meta, playlist), unsafe_allow_html=True)
+        # Display the custom HTML Results. 
+        final_html = render_results(name, persona_title, persona_desc, profile, top, meta, playlist)
+        
+        # Using st.markdown with unsafe_allow_html will now successfully render the blocks instead of printing them!
+        st.markdown(final_html, unsafe_allow_html=True)
