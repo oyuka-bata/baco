@@ -276,11 +276,13 @@ def score_song(row, profile):
 
 def recommend(answers, songs_df, k=6):
     profile = aggregate_profile(answers)
-    scored  = songs_df.copy()
-    scored["match_score"] = scored.apply(lambda r: score_song(r, profile), axis=1)  
+    scored  = songs_df.copy()  
+    scored["match_score"] = scored.apply(lambda r: score_song(r, profile), axis=1)
     scored = scored.sort_values("match_score", ascending=False)
-    return profile, scored.iloc[0], scored.head(k)
-
+    scored = scored.drop_duplicates(subset=["name", "artist"])
+    top_pick = scored.iloc[0]
+    playlist = scored.iloc[1:k+1]
+    return profile, top_pick, playlist
 def pick_persona(profile):
     e, v = profile["target_energy"], profile["target_valence"]
     if e >= 0.78 and v >= 0.78: return ("The Disco Heart", "Pure joy at full volume. You'd dance in an empty parking lot if the song hit.")
