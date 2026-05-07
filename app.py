@@ -38,8 +38,6 @@ import requests
 from IPython.display import display, HTML, clear_output, Audio
 
 # If you are on Google Colab, uncomment these two lines so widgets render:
-from google.colab import output
-output.enable_custom_widget_manager()
 
 """
 # 2. Backend + Dataset Pipeline (NEW)
