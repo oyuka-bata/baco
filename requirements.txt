@@ -1,2 +1,7 @@
-ipywidgets
 streamlit
+pandas
+requests
+matplotlib
+seaborn
+plotly
+scikit-learn
